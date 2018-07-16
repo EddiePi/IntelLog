@@ -77,7 +77,5 @@ public class ForceReplaceMap {
             this.regex = regex;
             this.target = target;
         }
-
-
     }
 }

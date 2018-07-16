@@ -8,6 +8,7 @@ import spell.LCSObject;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * We do not include the original message. This class is used to build the model.
@@ -24,9 +25,11 @@ public class IntelMessageRule implements Serializable {
     public KeyedMessageRule keyedMessageRule;
     public List<String> tokenSequence;
     public List<String> POSSequence;
+    // the length of POLSequence equals to real log content
     public List<String> POLSequence;
     public List<String> entities;
     public List<Operation> operations;
+    public Set<String> entityGroups;
 
 
     @Override

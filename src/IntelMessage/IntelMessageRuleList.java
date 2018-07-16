@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 /**
  * Created by Eddie on 2018/5/21.
  */
-public class IntelMessageList implements Serializable {
+public class IntelMessageRuleList implements Serializable {
 
 
     public List<IntelMessageRule> intelMessageRules;
@@ -28,7 +28,7 @@ public class IntelMessageList implements Serializable {
 
     transient SDToCheck sdToCheck = SDToCheck.getInstance();
 
-    public IntelMessageList() {
+    public IntelMessageRuleList() {
         intelMessageRules = new ArrayList<>();
     }
 

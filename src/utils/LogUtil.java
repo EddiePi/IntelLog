@@ -3,6 +3,7 @@ package utils;
 import NPL.Lemmatizer;
 
 import java.io.*;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -160,7 +161,31 @@ public class LogUtil {
             System.out.print("index out of boundary");
             return null;
         }
+    }
 
+    public static boolean isSubPhrase(String shorter, String longer) {
+        String[] shorterSeq = shorter.split("\\s+");
+        String[] longerSeq = longer.split("\\s+");
+        int shorterLen = shorterSeq.length;
+        int longerLen = longerSeq.length;
+        if (shorterLen > longerLen) {
+            return false;
+        }
+
+        for (int i = 0; i <= longerLen - shorterLen; i++) {
+            int j;
+            for (j = 0; j < shorterLen; j++) {
+                if (shorterSeq[j].equals(longerSeq[i + j])) {
+                    continue;
+                } else {
+                    break;
+                }
+            }
+            if (j == shorterLen) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static String spliceSequence(String[] seq) {
@@ -169,6 +194,24 @@ public class LogUtil {
             res += seq[i] + " ";
         }
         res = res.trim();
+        return res;
+    }
+
+    /**
+     * splice the sequence from the start index (inclusive) to the end index (exclusive)
+     * @param seq
+     * @param start
+     * @param end
+     * @return the spliced string
+     */
+    public static String spliceSequence(String[] seq, int start, int end) {
+        String res = "";
+        if (start >= 0 && start <= end && end <= seq.length) {
+            for (int i = start; i < end; i++) {
+                res += seq[i] + " ";
+            }
+            res = res.trim();
+        }
         return res;
     }
 
@@ -225,6 +268,35 @@ public class LogUtil {
                 keyWord.matches("BlockManagerId\\*")) {
             res = true;
         }
+        return res;
+    }
+
+    public static String[] idToTypeAndValue(String id) {
+        String[] res = new String[2];
+        int length = id.length();
+        int typeEndIndex;
+        int valueStartIndex;
+        char curChar;
+        for (typeEndIndex = 0; typeEndIndex < length; typeEndIndex++) {
+            curChar = id.charAt(typeEndIndex);
+            if (curChar >= 'a' && curChar <= 'z' || curChar >= 'A' && curChar <= 'Z' || curChar == ' ') {
+                continue;
+            } else {
+                break;
+            }
+        }
+        valueStartIndex = typeEndIndex;
+        if (valueStartIndex < length) {
+            curChar = id.charAt(valueStartIndex);
+            if (curChar != '(' && curChar != '[' && curChar != '{' && !(curChar <= '9' && curChar >= '0')) {
+                valueStartIndex++;
+            }
+        }
+        String idType = id.substring(0, typeEndIndex).trim();
+        String idValue = id.substring(valueStartIndex).trim();
+        res[0] = idType.toLowerCase();
+        res[1] = idValue.toLowerCase();
+
         return res;
     }
 }

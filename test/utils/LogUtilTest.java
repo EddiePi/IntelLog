@@ -40,4 +40,17 @@ public class LogUtilTest {
     public void subPhrase() throws Exception {
     }
 
+    @Test
+    public void idToTypeAndValue() throws Exception {
+        String[] res;
+        res = LogUtil.idToTypeAndValue("task 19");
+        System.out.printf("type: %s, value: %s\n", res[0], res[1]);
+        res = LogUtil.idToTypeAndValue("BlockManagerId(1, 3, 4, 5)");
+        System.out.printf("type: %s, value: %s\n", res[0], res[1]);
+        res = LogUtil.idToTypeAndValue("fetcher # 13");
+        System.out.printf("type: %s, value: %s\n", res[0], res[1]);
+        res = LogUtil.idToTypeAndValue("attempt_1_123_342");
+        System.out.printf("type: %s, value: %s\n", res[0], res[1]);
+    }
+
 }

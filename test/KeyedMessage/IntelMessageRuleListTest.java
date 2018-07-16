@@ -1,6 +1,6 @@
 package KeyedMessage;
 
-import IntelMessage.IntelMessageList;
+import IntelMessage.IntelMessageRuleList;
 import IntelMessage.IntelMessageRule;
 import Log.LogPreprocessor;
 import NPL.FrequencyCalculator;
@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  * Created by Eddie on 2018/5/21.
  */
 public class IntelMessageRuleListTest {
-    IntelMessageList intelMessageList = null;
+    IntelMessageRuleList intelMessageRuleList = null;
     List<LCSObject> lcsObjectList;
 
     FrequencyCalculator fc;
@@ -56,13 +56,13 @@ public class IntelMessageRuleListTest {
 
     @Test
     public void buildIntelMessages() throws Exception {
-        intelMessageList = (IntelMessageList) ObjectSerializer.deserialize("/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-intel-message.obj");
-        if (intelMessageList == null) {
-            intelMessageList = new IntelMessageList();
-            intelMessageList.buildIntelMessages(map);
-            ObjectSerializer.serialize(intelMessageList, "/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-intel-message.obj");
+        intelMessageRuleList = (IntelMessageRuleList) ObjectSerializer.deserialize("/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-intel-message.obj");
+        if (intelMessageRuleList == null) {
+            intelMessageRuleList = new IntelMessageRuleList();
+            intelMessageRuleList.buildIntelMessages(map);
+            ObjectSerializer.serialize(intelMessageRuleList, "/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-intel-message.obj");
         }
-        intelMessageList.report();
+        intelMessageRuleList.report();
     }
 
     @Test
@@ -94,7 +94,7 @@ public class IntelMessageRuleListTest {
         }
 
         for (String line: inputLog) {
-            for(IntelMessageRule rule: intelMessageList.intelMessageRules){
+            for(IntelMessageRule rule: intelMessageRuleList.intelMessageRules){
                 Pattern pattern = Pattern.compile(rule.keyedMessageRule.regex);
                 Matcher matcher = pattern.matcher(line);
                 if (matcher.matches()) {
