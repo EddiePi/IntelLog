@@ -94,4 +94,13 @@ public class IntelMessage {
         return ruleRef;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("original log: ").append(originalLog).append("\n");
+
+
+        return stringBuilder.toString();
+    }
+
 }

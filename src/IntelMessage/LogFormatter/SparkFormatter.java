@@ -6,6 +6,7 @@ import IntelMessage.IntelMessageRule;
 import spell.ForceReplaceMap;
 import utils.LogUtil;
 
+import java.io.File;
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -20,6 +21,11 @@ public class SparkFormatter extends AbstractFormatter {
 
     public SparkFormatter(String logFilePath, String ruleFilePath) {
         super(logFilePath, ruleFilePath);
+        punctReplaceMap = ForceReplaceMap.getInstance().punctReplaceMap;
+    }
+
+    public SparkFormatter(File logFile, IntelMessageRuleList intelMessageRuleList) {
+        super(logFile, intelMessageRuleList);
         punctReplaceMap = ForceReplaceMap.getInstance().punctReplaceMap;
     }
 

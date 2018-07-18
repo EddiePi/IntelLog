@@ -19,31 +19,64 @@ import java.util.regex.Pattern;
  * Created by Eddie on 2018/7/9.
  */
 public abstract class AbstractFormatter {
-    private Queue<IntelMessage> parsedIntelMessageQueue = new LinkedBlockingQueue<IntelMessage>();
+    private static Queue<IntelMessage> parsedIntelMessageQueue = new LinkedBlockingQueue<IntelMessage>();
     private static Logger logger = LogManager.getLogger(AbstractFormatter.class);
 
     protected File logFile;
     private LogReaderRunnable logReader;
     private Thread logReaderThread;
     private List<IntelMessageRule> ruleList;
+    private BufferedReader br;
 
     public AbstractFormatter(String filePath, String ruleFilePath) {
-        logFile = new File(filePath);
-        logReader = new LogReaderRunnable(logFile);
-        logReaderThread = new Thread(logReader);
+        try {
+            setLogFile(filePath);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
         IntelMessageRuleList intelMessageRuleList = GsonSerializer.readJSON(IntelMessageRuleList.class, ruleFilePath);
         ruleList = intelMessageRuleList.intelMessageRules;
     }
 
+    public AbstractFormatter(File logFile, IntelMessageRuleList intelMessageRuleList) {
+        try {
+            setLogFile(logFile);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        ruleList = intelMessageRuleList.intelMessageRules;
+    }
+
     /**
-     * The returned IntelMessage needs to be further processed to
-     * 1) match the corresponding rule
-     * 2) add id
-     * 3) add location info
-     * @return
+     * The turn the complete IntelMessage
+     *
+     * @return IntelMessage
      */
-    public IntelMessage getIntelMessage() {
+    public IntelMessage asyncGetIntelMessage() {
         return parsedIntelMessageQueue.poll();
+    }
+
+    public IntelMessage syncGetIntelMessage() {
+        IntelMessage newMessage = null;
+        try {
+            String line;
+                while ((line = br.readLine()) != null) {
+                    newMessage = format(line);
+                    if (newMessage == null) {
+                        continue;
+                    }
+                    newMessage = buildCompleteMessage(newMessage);
+                    if (newMessage == null) {
+                        logger.warn("log message: " + line + " has no matched rule. Please check existing rules or add new rules");
+                        continue;
+                    } else {
+                        break;
+                    }
+                }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return newMessage;
     }
 
     private class LogReaderRunnable implements Runnable {
@@ -158,6 +191,10 @@ public abstract class AbstractFormatter {
         return message;
     }
 
+    public void setLogFilePath(String filePath) {
+        logFile = new File(filePath);
+    }
+
     /**
      * this method is only called in <code>buildCompleteMessage</code>
      * @param logContent
@@ -258,10 +295,38 @@ public abstract class AbstractFormatter {
     }
 
     public void start() {
+        logReader = new LogReaderRunnable(logFile);
+        logReaderThread = new Thread(logReader);
         logReaderThread.start();
     }
 
     public void stop() {
         logReader.stop();
+    }
+
+    public void setLogFile(String filePath) throws FileNotFoundException {
+        setLogFile(new File(filePath));
+
+    }
+
+    public void setLogFile(File file) throws FileNotFoundException {
+        this.logFile = file;
+        if (!file.exists()) {
+            throw new FileNotFoundException();
+        }
+        try {
+            br = new BufferedReader(new FileReader(logFile));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setRuleList(IntelMessageRuleList ruleList) {
+        this.ruleList = ruleList.intelMessageRules;
+    }
+
+    public void setRuleList(String rulePath) {
+        IntelMessageRuleList intelMessageRuleList = GsonSerializer.readJSON(IntelMessageRuleList.class, rulePath);
+        this.ruleList = intelMessageRuleList.intelMessageRules;
     }
 }

@@ -25,8 +25,9 @@ public class IntelMessageRuleList implements Serializable {
 
     public List<IntelMessageRule> intelMessageRules;
 
-
     transient SDToCheck sdToCheck = SDToCheck.getInstance();
+
+    transient Map<String, Set<IntelMessageRule>> groupToRuleMap = null;
 
     public IntelMessageRuleList() {
         intelMessageRules = new ArrayList<>();
@@ -324,6 +325,27 @@ public class IntelMessageRuleList implements Serializable {
 
             intelMessageRules.add(newIntelRule);
         }
+    }
+
+    public Map<String, Set<IntelMessageRule>> buildGroupToRuleMap() {
+        if (groupToRuleMap != null) {
+            return groupToRuleMap;
+        }
+        Map<String, Set<IntelMessageRule>> res = new HashMap<>();
+        Set<String> groups;
+        for (IntelMessageRule rule: intelMessageRules) {
+            groups = rule.entityGroups;
+            for (String group: groups) {
+                Set<IntelMessageRule> rulesInGroup = res.get(group);
+                if (rulesInGroup == null) {
+                    rulesInGroup = new HashSet<>();
+                    res.put(group, rulesInGroup);
+                }
+                rulesInGroup.add(rule);
+            }
+        }
+        groupToRuleMap = res;
+        return groupToRuleMap;
     }
 
     public void report() {

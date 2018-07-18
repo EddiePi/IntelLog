@@ -50,6 +50,13 @@ public class IntelMessageRuleListTest {
     }
 
     @Test
+    public void reverseIndex() throws Exception {
+        String path = "/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-intel-log-with-group.json";
+        intelMessageRuleList = GsonSerializer.readJSON(IntelMessageRuleList.class, path);
+        intelMessageRuleList.buildGroupToRuleMap();
+    }
+
+    @Test
     public void report() throws Exception {
         List list = new ArrayList();
     }
