@@ -75,7 +75,7 @@ public class TaggerTest {
 
     public void writeTaggedLine() throws Exception {
         //FileWriter fw = new FileWriter(new File("/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-keys-tags.txt"));
-        FileWriter fw = new FileWriter(new File("/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-keys-tags.txt"));
+        FileWriter fw = new FileWriter(new File("/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-unmodified-keys-tags.txt"));
         for (int i = 0; i < keys.size(); i++) {
             String keyTag = "";
             String[] key = keys.get(i);

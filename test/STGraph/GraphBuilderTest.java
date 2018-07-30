@@ -3,12 +3,11 @@ package STGraph;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 /**
  * Created by Eddie on 2018/7/17.
  */
 public class GraphBuilderTest {
+
     GraphBuilder builder;
     @Before
     public void setUp() throws Exception {
@@ -16,8 +15,20 @@ public class GraphBuilderTest {
     }
 
     @Test
-    public void build() throws Exception {
-        builder.build();
+    public void buildMatrix() throws Exception {
+        HelperComposite root = builder.buildMatrix();
+        System.out.print("built");
+        root.reportRelationship();
+        System.out.println();
+        root.reportCommonRelationship();
+        System.out.println();
+        root.reportCommonRuleRelationship();
+
+    }
+
+    @Test
+    public void buildGraph() throws Exception {
+        builder.buildGraph();
     }
 
 }

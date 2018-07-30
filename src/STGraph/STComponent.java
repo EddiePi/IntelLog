@@ -3,13 +3,14 @@ package STGraph;
 import IntelMessage.IntelMessage;
 import IntelMessage.IntelMessageRule;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Set;
 
 /**
  * Created by Eddie on 2018/7/5.
  */
-public abstract class STComponent {
+public abstract class STComponent implements Serializable {
 
     public String groupKey;
     public GroupLevel groupLevel;

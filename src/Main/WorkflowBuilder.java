@@ -2,9 +2,6 @@ package Main;
 
 import IntelMessage.IntelMessageRule;
 import IntelMessage.IntelMessageRuleList;
-import IntelMessage.LogFormatter.AbstractFormatter;
-import IntelMessage.LogFormatter.SparkFormatter;
-import STGraph.STComposite;
 import utils.GsonSerializer;
 
 import java.util.Map;

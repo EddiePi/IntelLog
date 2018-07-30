@@ -37,7 +37,7 @@ public class LCSMapTest {
             BufferedWriter bw = new BufferedWriter(new FileWriter(fileName));
             for (LCSObject lcsObject: map.getAllLCSObjects()) {
                 String key = lcsObject.getLCSString().trim();
-                //bw.write(key + "\n");
+                bw.write(key + "\n");
                 System.out.printf("%s\n", key);
             }
             bw.close();

@@ -61,7 +61,11 @@ public abstract class AbstractFormatter {
         try {
             String line;
                 while ((line = br.readLine()) != null) {
+                    //logger.debug("parsing log: " + line);
                     newMessage = format(line);
+//                    if (line.matches(".*attempt.*Got.*new map-outputs")) {
+//                        System.out.print("STOP");
+//                    }
                     if (newMessage == null) {
                         continue;
                     }

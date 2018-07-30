@@ -299,4 +299,31 @@ public class LogUtil {
 
         return res;
     }
+
+    public static String extractAppFromPath(String str) {
+        String[] parts = str.split("/");
+        String appStr = null;
+        String containerStr = null;
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i].matches("application_\\d+_\\d+")) {
+                appStr = parts[i];
+                break;
+            }
+            if (parts[i].matches("container_\\d+_\\d+_\\d+_\\d+")) {
+                containerStr = parts[i];
+                break;
+            }
+        }
+        if (appStr != null) {
+            return appStr;
+        }
+        if (containerStr != null) {
+            parts = containerStr.split("_");
+            StringBuilder builder = new StringBuilder("");
+            builder.append("application_").append(parts[1] + "_").append(parts[2]);
+            return builder.toString();
+        }
+        return null;
+
+    }
 }

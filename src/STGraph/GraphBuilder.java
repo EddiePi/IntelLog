@@ -7,12 +7,14 @@ import Main.BuilderConf;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import utils.GsonSerializer;
+import utils.LogUtil;
 import utils.RootPathReader;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 /**
  * <code>GraphBuilder</code> combines <code>AbstractFormatter</code> and <code>IntelMessageRuleList</code>.
@@ -26,16 +28,30 @@ public class GraphBuilder {
     String logRootPath;
     String intelRulePath;
     String logFormatterClassName;
+    boolean useCommonGroup;
     Class<? extends AbstractFormatter> formatterClazz;
     Constructor<?> formatterConstructor;
     AbstractFormatter formatter;
     RootPathReader rootPathReader;
     IntelMessageRuleList intelMessageRuleList;
 
+    HelperComposite helper = null;
+
+    // fields about building the graph
+    Stack<STNode> buildingNodesStack;
+
+    // record the relationship between each group
+    ArrayList<ArrayList<HierarchyType>>  groupRelationship;
+    // group name to index map
+    Map<Integer, String> indexToGroupNameMap;
+    Map<String, Integer> groupNameToIndexMap;
+
+
     public GraphBuilder() {
         logRootPath = conf.getStringOrDefault("log-root.file.path", "../conf/log-root/");
         intelRulePath = conf.getStringOrDefault("intel-rule.file.path", "../conf/intel-log-rule.json");
         logFormatterClassName = conf.getStringOrDefault("log-formatter.class.name", "IntelMessage.LogFormatter.SparkFormatter");
+        useCommonGroup = conf.getBooleanOrDefault("st-graph.common-group", true);
         rootPathReader = new RootPathReader(logRootPath);
         intelMessageRuleList = GsonSerializer.readJSON(IntelMessageRuleList.class, intelRulePath);
         try {
@@ -46,12 +62,15 @@ public class GraphBuilder {
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
+
+        buildingNodesStack = new Stack<>();
     }
 
-    public STComposite build() {
+    public HelperComposite buildMatrix() {
         File logFile;
-        STComposite root = new STComposite("root", intelMessageRuleList.buildGroupToRuleMap());
+        helper = new HelperComposite("root", intelMessageRuleList);
         while ((logFile = rootPathReader.nextFile()) != null) {
+
             if (logFile.getName().startsWith(".")) {
                 continue;
             }
@@ -59,6 +78,8 @@ public class GraphBuilder {
                 formatter = (AbstractFormatter) formatterConstructor.newInstance(logFile, intelMessageRuleList);
                 formatter.setLogFile(logFile);
                 formatter.setRuleList(intelMessageRuleList);
+
+
             } catch (InstantiationException e) {
                 e.printStackTrace();
             } catch (FileNotFoundException e) {
@@ -68,14 +89,117 @@ public class GraphBuilder {
             } catch (InvocationTargetException e) {
                 e.printStackTrace();
             }
-            root.resetTimestamp();
+
+            helper.resetTimestamp();
             IntelMessage message;
             while((message = formatter.syncGetIntelMessage()) != null) {
-                root.addIntelMessage(message);
+                helper.addIntelMessage(message);
             }
             logger.debug("added log file: " + logFile.getAbsolutePath());
-            root.updateRelationship();
+            helper.updateRelationship();
+//            // this field is for mr log
+//            String curAppName;
+//            curAppName = LogUtil.extractAppFromPath(logFile.getAbsolutePath());
+//            if (prevAppName == null || !prevAppName.equals(curAppName)) {
+//                helper.resetTimestamp();
+//                prevAppName = curAppName;
+//                helper.reset();
+//            }
+        }
+
+        this.groupRelationship = helper.groupRelationship;
+        this.indexToGroupNameMap = helper.indexToGroupNameMap;
+        this.groupNameToIndexMap = helper.groupNameToIndexMap;
+
+        return helper;
+    }
+
+    public STNode buildGraph() {
+        STNode root = new STNode("ROOT");
+        if (helper == null) {
+            buildMatrix();
+        }
+        root.remainingGroups.addAll(useCommonGroup ? helper.getCommonRelationship() : helper.groupToRules.keySet());
+
+        buildingNodesStack.push(root);
+        while (!buildingNodesStack.empty()) {
+            STNode curNode = buildingNodesStack.pop();
+            buildSTNode(curNode);
+            // push after nodes into stack
+            for (STNode afterNode: curNode.directAfterGroups.values()) {
+                buildingNodesStack.push(afterNode);
+            }
+
+            // push child nodes into stack
+            for (STNode childNode: curNode.directChildrenGroups.values()) {
+                buildingNodesStack.push(childNode);
+            }
         }
         return root;
+    }
+
+    void buildSTNode(STNode node) {
+        Set<String> childGroupCandidates = new HashSet<>();
+        Set<String> afterGroupCandidates = new HashSet<>();
+        // build the child candidates
+        if (!node.group.equals("ROOT")) {
+            List<HierarchyType> nodeRow = groupRelationship.get(groupNameToIndexMap.get(node.group));
+            for (int i = 0; i < nodeRow.size(); i ++) {
+                String groupToCompare = indexToGroupNameMap.get(i);
+                if (node.remainingGroups.contains(groupToCompare)) {
+                    if (nodeRow.get(i) == HierarchyType.BEFORE) {
+                        afterGroupCandidates.add(groupToCompare);
+                    }
+                    if (nodeRow.get(i) == HierarchyType.IS_PARENT) {
+                        childGroupCandidates.add(groupToCompare);
+                    }
+                }
+            }
+        } else {
+            childGroupCandidates.addAll(node.remainingGroups);
+        }
+
+        for (int i = 0; i < groupRelationship.size(); i++) {
+            String groupInRow = indexToGroupNameMap.get(i);
+            if (!node.remainingGroups.contains(groupInRow)) {
+                continue;
+            }
+            for (int j = 0; j < groupRelationship.size(); j++) {
+                String groupInColumn = indexToGroupNameMap.get(j);
+                if (!node.remainingGroups.contains(groupInColumn)) {
+                    continue;
+                }
+                if (i == j) {
+                    continue;
+                }
+
+                HierarchyType curType = groupRelationship.get(i).get(j);
+                if (curType == HierarchyType.IS_CHILD) {
+                    childGroupCandidates.remove(groupInRow);
+                    afterGroupCandidates.remove(groupInRow);
+                }
+                if (curType == HierarchyType.AFTER) {
+                    afterGroupCandidates.remove(groupInRow);
+                    childGroupCandidates.remove(groupInRow);
+                }
+            }
+        }
+
+        Set<String> remainingInSub = new HashSet<>(node.remainingGroups);
+
+        remainingInSub.removeAll(childGroupCandidates);
+        remainingInSub.removeAll(afterGroupCandidates);
+
+        for (String group: childGroupCandidates) {
+            STNode newChild = new STNode(group);
+            newChild.remainingGroups.addAll(remainingInSub);
+            node.directChildrenGroups.put(group, newChild);
+        }
+
+        for (String group: afterGroupCandidates) {
+            STNode newAfter = new STNode(group);
+            newAfter.remainingGroups.addAll(remainingInSub);
+            node.directAfterGroups.put(group, newAfter);
+        }
     }
 }

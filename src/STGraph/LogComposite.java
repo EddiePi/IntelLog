@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Eddie on 2018/7/17.
+ * This is a helper class that denote the information in real log message
  */
 public class LogComposite extends STComponent {
     List<IntelMessage> groupedIntelMessage;

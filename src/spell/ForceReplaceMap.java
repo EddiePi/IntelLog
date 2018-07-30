@@ -27,10 +27,10 @@ public class ForceReplaceMap {
         addIdRule("application_\\d+_\\d+");
         addIdRule("container_\\d+_\\d+_\\d+_\\d+");
         addIdRule("BlockManagerId(.*)", "BlockManagerId*");
-        addIdRule("attempt_\\d+_\\d+_m_\\d+_\\d+");
-        addIdRule("attempt_\\d+_\\d+_r_\\d+_\\d+");
-        addIdRule("'attempt_\\d+_\\d+_m_\\d+_\\d+'", "attempt_\\d+_\\d+_m_\\d+_\\d+");
-        addIdRule("'attempt_\\d+_\\d+_r_\\d+_\\d+'", "attempt_\\d+_\\d+_r_\\d+_\\d+");
+        //addIdRule("attempt_\\d+_\\d+_m_\\d+_\\d+");
+        //addIdRule("attempt_\\d+_\\d+_r_\\d+_\\d+");
+        addIdRule("'?attempt_\\d+_\\d+_m_\\d+_\\d+'?", "attempt_\\d+_\\d+_m_\\d+_\\d+");
+        addIdRule("'?attempt_\\d+_\\d+_r_\\d+_\\d+'?", "attempt_\\d+_\\d+_r_\\d+_\\d+");
         addIdRule("jvm_\\d+_\\d+_r_\\d+");
         addIdRule("jvm_\\d+_\\d+_m_\\d+");
 

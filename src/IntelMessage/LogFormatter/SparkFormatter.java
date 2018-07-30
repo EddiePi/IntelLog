@@ -7,6 +7,7 @@ import spell.ForceReplaceMap;
 import utils.LogUtil;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -44,7 +45,13 @@ public class SparkFormatter extends AbstractFormatter {
         Long timestamp = parseTimestamp(logMessage);
         // we also have to add space to some punctuations on the content
         String content = extractContent(logMessage);
+        if (content.length() == 0) {
+            return null;
+        }
         content = replacePunctuation(content);
+        while(content.charAt(content.length() - 1) == '.') {
+            content = content.substring(0, content.length() - 1);
+        }
         res.setTimestamp(timestamp);
         res.setOriginalLog(content);
         String containerId = parseContainerIdFromPath(logFile.getAbsolutePath());
@@ -87,18 +94,29 @@ public class SparkFormatter extends AbstractFormatter {
     }
 
     // public for test
-    private static String extractContent(String logMessage) {
+    private String extractContent(String logMessage) {
         int contentStartIndex;
         int spaceCount = 0;
-        for (contentStartIndex = 0; contentStartIndex < logMessage.length(); contentStartIndex++) {
-            if (logMessage.charAt(contentStartIndex) == ' ' || logMessage.charAt(contentStartIndex) == '\t') {
-                spaceCount++;
+        String content = "";
+        if (logFile.getName().equals("stderr")) {
+            for (contentStartIndex = 0; contentStartIndex < logMessage.length(); contentStartIndex++) {
+                if (logMessage.charAt(contentStartIndex) == ' ' || logMessage.charAt(contentStartIndex) == '\t') {
+                    spaceCount++;
+                }
+                if (spaceCount == 4 && logFile.getName().equals("stderr")) {
+                    break;
+                }
             }
-            if (spaceCount == 4) {
-                break;
+            content = logMessage.substring(contentStartIndex + 1);
+        } else if (logFile.getName().equals("syslog")) {
+            Pattern pattern = Pattern.compile("([\\d]{2}|[\\d]{4})[/\\-][\\d]{2}[/\\-][\\d]{2}\\s[\\d]{2}:[\\d]{2}:[\\d]{2}([,\\.][\\d]{3})? [A-Z]+ \\[[a-zA-Z\\s]+\\] (?<classcontent>.*)");
+            Matcher matcher = pattern.matcher(logMessage);
+            if (matcher.matches()) {
+                String classContent = matcher.group("classcontent");
+                contentStartIndex = classContent.indexOf(":");
+                content = classContent.substring(contentStartIndex + 2).trim();
             }
         }
-        String content = logMessage.substring(contentStartIndex + 1);
         return content;
     }
 
