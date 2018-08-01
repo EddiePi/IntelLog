@@ -2,6 +2,7 @@ package STGraph;
 
 import IntelMessage.IntelMessageRule;
 import IntelMessage.IntelMessageRuleList;
+import IntelMessage.RuleListSingleton;
 import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +41,7 @@ public class EntityClassifierTest {
     public void assignGroup() throws Exception {
         String readingRuleListFile = "/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-intel-log.json";
         String writingRuleListFile = "/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-intel-log-with-group.json";
-        IntelMessageRuleList ruleList = GsonSerializer.readJSON(IntelMessageRuleList.class, readingRuleListFile);
+        IntelMessageRuleList ruleList = RuleListSingleton.getInstance().getIntelMessageRuleList();
         classifier.buildEntityGroup(entityFilePath);
         Map<String, Set<String>> wordToGroupMap = classifier.wordToGroupMap;
         for (IntelMessageRule rule: ruleList.intelMessageRules) {

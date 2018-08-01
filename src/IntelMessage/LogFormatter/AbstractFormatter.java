@@ -2,6 +2,7 @@ package IntelMessage.LogFormatter;
 
 import IntelMessage.*;
 import com.sun.istack.internal.Nullable;
+import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
 import spell.ForceReplaceMap;
 import utils.GsonSerializer;
 import org.apache.logging.log4j.*;
@@ -11,6 +12,7 @@ import java.io.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +29,7 @@ public abstract class AbstractFormatter {
     private Thread logReaderThread;
     private List<IntelMessageRule> ruleList;
     private BufferedReader br;
+    private List<String> ignoreRuleSet;
 
     public AbstractFormatter(String filePath, String ruleFilePath) {
         try {
@@ -34,8 +37,9 @@ public abstract class AbstractFormatter {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        IntelMessageRuleList intelMessageRuleList = GsonSerializer.readJSON(IntelMessageRuleList.class, ruleFilePath);
+        IntelMessageRuleList intelMessageRuleList = RuleListSingleton.getInstance().getIntelMessageRuleList();
         ruleList = intelMessageRuleList.intelMessageRules;
+        ignoreRuleSet = IgnoreRules.getInstance().ignoreRules;
     }
 
     public AbstractFormatter(File logFile, IntelMessageRuleList intelMessageRuleList) {
@@ -45,6 +49,7 @@ public abstract class AbstractFormatter {
             e.printStackTrace();
         }
         ruleList = intelMessageRuleList.intelMessageRules;
+        ignoreRuleSet = IgnoreRules.getInstance().ignoreRules;
     }
 
     /**
@@ -63,9 +68,19 @@ public abstract class AbstractFormatter {
                 while ((line = br.readLine()) != null) {
                     //logger.debug("parsing log: " + line);
                     newMessage = format(line);
-//                    if (line.matches(".*attempt.*Got.*new map-outputs")) {
+//                    if (line.matches(".*about to shuffle.*")) {
 //                        System.out.print("STOP");
 //                    }
+                    boolean ignore = false;
+                    for (String subStr: ignoreRuleSet) {
+                        if (line.contains(subStr)) {
+                            ignore = true;
+                            break;
+                        }
+                    }
+                    if (ignore) {
+                        continue;
+                    }
                     if (newMessage == null) {
                         continue;
                     }
@@ -181,6 +196,10 @@ public abstract class AbstractFormatter {
                     break;
                 }
             }
+            //TEST
+//            if (contentSeq.length >= 3 && contentSeq[0].equals("Task") && contentSeq[2].equals("done")) {
+//                System.out.print("stop");
+//            }
             String splicedVariable = LogUtil.spliceSequence(contentSeq, index, positionEnd + 1);
             if (currentPOL.equals("LOC")) {
                 message.addLocation(splicedVariable);
@@ -191,6 +210,13 @@ public abstract class AbstractFormatter {
                 message.addIdentifier(name_value[0], name_value[1]);
             }
             index = positionEnd + 1;
+        }
+        // TEST
+//        if (message.originalLog.contains("about to shuffle")) {
+//            System.out.print("STOP");
+//        }
+        if (rule.exampleMessage == null) {
+            rule.exampleMessage = message;
         }
         return message;
     }

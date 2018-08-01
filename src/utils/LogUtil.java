@@ -272,8 +272,21 @@ public class LogUtil {
     }
 
     public static String[] idToTypeAndValue(String id) {
+
         String[] res = new String[2];
         int length = id.length();
+        if (length == 0) {
+            return res;
+        }
+        if (id.charAt(0) == '\'') {
+            id = id.substring(1, length);
+            length = id.length();
+        }
+        if (id.charAt(length - 1) == '\'') {
+            id = id.substring(0, length - 1);
+            length = id.length();
+        }
+
         int typeEndIndex;
         int valueStartIndex;
         char curChar;

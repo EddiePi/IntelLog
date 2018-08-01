@@ -1,0 +1,13 @@
+# MR ignore
+Error when creating PropertyDescriptor for public final void
+Kind: mapreduce.job, Service:
+mapreduce.cluster.local.dir for child:
+is deprecated. Instead, use
+Using ShuffleConsumerPlugin:
+Processing split: hdfs://
+mapreduce.task.io.sort.mb:
+Map output collector class =
+
+# Spark ignore
+for block replication policy
+Input split: hdfs:

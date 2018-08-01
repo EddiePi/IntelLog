@@ -45,14 +45,13 @@ public class IntelMessageRuleListTest {
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
-        intelMessageRuleList = GsonSerializer.readJSON(IntelMessageRuleList.class, path);
-        System.out.print("stop");
+        intelMessageRuleList = RuleListSingleton.getInstance().getIntelMessageRuleList();
+        //System.out.print("stop");
     }
 
     @Test
     public void reverseIndex() throws Exception {
-        String path = "/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-intel-log-with-group.json";
-        intelMessageRuleList = GsonSerializer.readJSON(IntelMessageRuleList.class, path);
+        intelMessageRuleList = RuleListSingleton.getInstance().getIntelMessageRuleList();
         intelMessageRuleList.buildGroupToRuleMap();
     }
 

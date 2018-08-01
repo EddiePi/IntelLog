@@ -38,6 +38,10 @@ public class SparkFormatter extends AbstractFormatter {
      */
     @Override
     protected IntelMessage format(String logMessage) {
+        // TEST
+//        if (logMessage.contains("about to shuffle")) {
+//            System.out.print("STOP");
+//        }
         if (!isOriginalFormat(logMessage)) {
             return null;
         }
@@ -109,7 +113,7 @@ public class SparkFormatter extends AbstractFormatter {
             }
             content = logMessage.substring(contentStartIndex + 1);
         } else if (logFile.getName().equals("syslog")) {
-            Pattern pattern = Pattern.compile("([\\d]{2}|[\\d]{4})[/\\-][\\d]{2}[/\\-][\\d]{2}\\s[\\d]{2}:[\\d]{2}:[\\d]{2}([,\\.][\\d]{3})? [A-Z]+ \\[[a-zA-Z\\s]+\\] (?<classcontent>.*)");
+            Pattern pattern = Pattern.compile("([\\d]{2}|[\\d]{4})[/\\-][\\d]{2}[/\\-][\\d]{2}\\s[\\d]{2}:[\\d]{2}:[\\d]{2}([,\\.][\\d]{3})? [A-Z]+ \\[[a-zA-Z0-9\\s#]+\\] (?<classcontent>.*)");
             Matcher matcher = pattern.matcher(logMessage);
             if (matcher.matches()) {
                 String classContent = matcher.group("classcontent");

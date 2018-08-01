@@ -1,5 +1,6 @@
 package IntelMessage;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,12 +10,12 @@ import java.util.Map;
  * This is built for EACH matched log message
  *
  */
-public class IntelMessage {
-    String originalLog;
-    Map<String, String> identifiers;
-    List<String> locationList;
-    List<String> valueList;
-    Long timestamp;
+public class IntelMessage implements Serializable {
+    public String originalLog;
+    public Map<String, String> identifiers;
+    public List<String> locationList;
+    public List<String> valueList;
+    public Long timestamp;
 
     /** Intel Message Rule Ref includes
      * 1) the original log key
@@ -24,7 +25,9 @@ public class IntelMessage {
      */
     public IntelMessageRule ruleRef;
 
-    public IntelMessage() {}
+    public IntelMessage() {
+        identifiers = new HashMap<>();
+    }
 
 
     // all getter and setter functions
@@ -37,9 +40,6 @@ public class IntelMessage {
     }
 
     public void addIdentifier(String type, String value) {
-        if (identifiers == null) {
-            identifiers = new HashMap<>();
-        }
         identifiers.put(type, value);
     }
 

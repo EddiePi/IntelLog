@@ -31,6 +31,9 @@ public class IntelMessageRule implements Serializable {
     public List<Operation> operations;
     public Set<String> entityGroups;
 
+    // this is to build sub-routine
+    public IntelMessage exampleMessage = null;
+
 
     @Override
     public String toString() {

@@ -2,6 +2,7 @@ package STGraph;
 
 import org.junit.Before;
 import org.junit.Test;
+import utils.GsonSerializer;
 
 /**
  * Created by Eddie on 2018/7/17.
@@ -28,7 +29,9 @@ public class GraphBuilderTest {
 
     @Test
     public void buildGraph() throws Exception {
-        builder.buildGraph();
+        String graphPath = "/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-map-graph.json";
+        STNode root = builder.buildGraph();
+        //GsonSerializer.writeJSON(root, graphPath);
     }
 
 }

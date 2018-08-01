@@ -1,7 +1,6 @@
 package STGraph;
 
-import IntelMessage.IntelMessage;
-import IntelMessage.IntelMessageRuleList;
+import IntelMessage.*;
 import IntelMessage.LogFormatter.AbstractFormatter;
 import Main.BuilderConf;
 import org.apache.logging.log4j.LogManager;
@@ -49,11 +48,10 @@ public class GraphBuilder {
 
     public GraphBuilder() {
         logRootPath = conf.getStringOrDefault("log-root.file.path", "../conf/log-root/");
-        intelRulePath = conf.getStringOrDefault("intel-rule.file.path", "../conf/intel-log-rule.json");
         logFormatterClassName = conf.getStringOrDefault("log-formatter.class.name", "IntelMessage.LogFormatter.SparkFormatter");
         useCommonGroup = conf.getBooleanOrDefault("st-graph.common-group", true);
         rootPathReader = new RootPathReader(logRootPath);
-        intelMessageRuleList = GsonSerializer.readJSON(IntelMessageRuleList.class, intelRulePath);
+        intelMessageRuleList = RuleListSingleton.getInstance().getIntelMessageRuleList();
         try {
             formatterClazz = (Class<? extends AbstractFormatter>) Class.forName(logFormatterClassName);
             formatterConstructor = formatterClazz.getDeclaredConstructor(File.class, IntelMessageRuleList.class);
@@ -200,6 +198,15 @@ public class GraphBuilder {
             STNode newAfter = new STNode(group);
             newAfter.remainingGroups.addAll(remainingInSub);
             node.directAfterGroups.put(group, newAfter);
+        }
+
+        // assign corresponding IntelMessageRule to the note
+        // and find the signature group
+        Set<String> commonGroup = helper.getCommonRelationship();
+        if (commonGroup.contains(node.group)) {
+            for (IntelMessageRule rule : helper.groupToRules.get(node.group)) {
+                node.updateSignatureSet(rule);
+            }
         }
     }
 }

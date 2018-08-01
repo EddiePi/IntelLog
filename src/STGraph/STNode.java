@@ -1,5 +1,9 @@
 package STGraph;
 
+import IntelMessage.IntelMessage;
+import IntelMessage.IntelMessageRule;
+
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -8,10 +12,12 @@ import java.util.Set;
 /**
  * Created by Eddie on 2018/7/23.
  */
-public class STNode {
+public class STNode implements Serializable{
     String group;
 
-    public Set<String> remainingGroups;
+    Set<SignatureRelationship> signatureSet;
+
+    public transient Set<String> remainingGroups;
 
     public Map<String, STNode> directChildrenGroups;
 
@@ -22,5 +28,52 @@ public class STNode {
         directChildrenGroups = new HashMap<>();
         directAfterGroups = new HashMap<>();
         remainingGroups = new HashSet<>();
+        signatureSet = new HashSet<>();
+
+        // none-sig set init
+        SignatureRelationship noneRelationship = new SignatureRelationship();
+        noneRelationship.idSignature.add("NONE");
+        signatureSet.add(noneRelationship);
+    }
+
+    public void updateSignatureSet(IntelMessageRule rule) {
+        Set<String> curSignature = SignatureRelationship.getSignatureSet(rule);
+        if (curSignature == null) {
+            return;
+        }
+        if (curSignature.size() == 0) {
+            for (SignatureRelationship relationship: signatureSet) {
+                if (relationship.idSignature.contains("NONE") && relationship.idSignature.size() == 1) {
+                    relationship.includedRules.add(rule);
+                    return;
+                }
+            }
+        }
+        boolean found = false;
+        for (SignatureRelationship relationship: signatureSet) {
+            if (relationship.idSignature.containsAll(curSignature)) {
+                relationship.includedRules.add(rule);
+                found = true;
+                continue;
+            }
+            if (curSignature.containsAll(relationship.idSignature)) {
+                relationship.idSignature = curSignature;
+                relationship.includedRules.add(rule);
+                found = true;
+                continue;
+            }
+            for (String group: curSignature) {
+                if (relationship.idSignature.contains(group)) {
+                    relationship.includedRules.add(rule);
+                    break;
+                }
+            }
+        }
+        if (!found) {
+            SignatureRelationship newRelationship = new SignatureRelationship();
+            newRelationship.includedRules.add(rule);
+            newRelationship.idSignature = curSignature;
+            signatureSet.add(newRelationship);
+        }
     }
 }
