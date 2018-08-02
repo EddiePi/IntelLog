@@ -30,6 +30,7 @@ public abstract class AbstractFormatter {
     private List<IntelMessageRule> ruleList;
     private BufferedReader br;
     private List<String> ignoreRuleSet;
+    private FormatterMode mode;
 
     public AbstractFormatter(String filePath, String ruleFilePath) {
         try {
@@ -43,6 +44,10 @@ public abstract class AbstractFormatter {
     }
 
     public AbstractFormatter(File logFile, IntelMessageRuleList intelMessageRuleList) {
+        this(logFile, intelMessageRuleList, FormatterMode.BUILDING);
+    }
+
+    public AbstractFormatter(File logFile, IntelMessageRuleList intelMessageRuleList, FormatterMode mode) {
         try {
             setLogFile(logFile);
         } catch (FileNotFoundException e) {
@@ -50,6 +55,7 @@ public abstract class AbstractFormatter {
         }
         ruleList = intelMessageRuleList.intelMessageRules;
         ignoreRuleSet = IgnoreRules.getInstance().ignoreRules;
+        this.mode = mode;
     }
 
     /**
@@ -160,11 +166,16 @@ public abstract class AbstractFormatter {
      * @return
      */
     public IntelMessage buildCompleteMessage(IntelMessage message) {
+
         IntelMessageRule rule = getIntelMessageRule(message.getOriginalLog());
         if (rule == null) {
             rule = getIntelMessageRuleFromRegex(message.getOriginalLog());
         }
         if (rule == null) {
+            if (mode == FormatterMode.CONSUMING) {
+                message.ruleRef = null;
+                return message;
+            }
             return null;
         }
         message.ruleRef = rule;
@@ -358,5 +369,10 @@ public abstract class AbstractFormatter {
     public void setRuleList(String rulePath) {
         IntelMessageRuleList intelMessageRuleList = GsonSerializer.readJSON(IntelMessageRuleList.class, rulePath);
         this.ruleList = intelMessageRuleList.intelMessageRules;
+    }
+
+
+    public enum FormatterMode {
+        BUILDING, CONSUMING
     }
 }

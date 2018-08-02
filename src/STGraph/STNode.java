@@ -44,7 +44,7 @@ public class STNode implements Serializable{
         if (curSignature.size() == 0) {
             for (SignatureRelationship relationship: signatureSet) {
                 if (relationship.idSignature.contains("NONE") && relationship.idSignature.size() == 1) {
-                    relationship.includedRules.add(rule);
+                    relationship.addIncludedRule(rule);
                     return;
                 }
             }
@@ -52,26 +52,26 @@ public class STNode implements Serializable{
         boolean found = false;
         for (SignatureRelationship relationship: signatureSet) {
             if (relationship.idSignature.containsAll(curSignature)) {
-                relationship.includedRules.add(rule);
+                relationship.addIncludedRule(rule);
                 found = true;
                 continue;
             }
             if (curSignature.containsAll(relationship.idSignature)) {
                 relationship.idSignature = curSignature;
-                relationship.includedRules.add(rule);
+                relationship.addIncludedRule(rule);
                 found = true;
                 continue;
             }
             for (String group: curSignature) {
                 if (relationship.idSignature.contains(group)) {
-                    relationship.includedRules.add(rule);
+                    relationship.addIncludedRule(rule);
                     break;
                 }
             }
         }
         if (!found) {
             SignatureRelationship newRelationship = new SignatureRelationship();
-            newRelationship.includedRules.add(rule);
+            newRelationship.addIncludedRule(rule);
             newRelationship.idSignature = curSignature;
             signatureSet.add(newRelationship);
         }

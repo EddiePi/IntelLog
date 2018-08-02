@@ -12,12 +12,15 @@ import java.util.Set;
  * Created by Eddie on 2018/8/1.
  */
 public class SigInstanceManager {
+    String group;
+
     SignatureRelationship relationship;
 
     Map<Set<String>, SignatureInstance> instanceMap;
 
-    public SigInstanceManager(SignatureRelationship relationship) {
+    public SigInstanceManager(SignatureRelationship relationship, String group) {
         this.relationship = relationship;
+        this.group = group;
         instanceMap = new HashMap<>();
     }
 
@@ -33,7 +36,7 @@ public class SigInstanceManager {
             }
         }
         if (!found) {
-            SignatureInstance instance = new SignatureInstance(relationship);
+            SignatureInstance instance = new SignatureInstance(relationship, group);
             instance.addMessage(message, extractedId);
             instanceMap.put(extractedId, instance);
         }
@@ -54,5 +57,11 @@ public class SigInstanceManager {
             }
         }
         return extractedId;
+    }
+
+    public void report() {
+        for (Map.Entry<Set<String>, SignatureInstance> entry: instanceMap.entrySet()) {
+            entry.getValue().checkMessages();
+        }
     }
 }

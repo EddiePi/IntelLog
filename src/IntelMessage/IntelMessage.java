@@ -86,10 +86,6 @@ public class IntelMessage implements Serializable {
         return timestamp;
     }
 
-    public void setRuleRef(IntelMessageRule rule) {
-        this.ruleRef = rule;
-    }
-
     public IntelMessageRule getRuleRef() {
         return ruleRef;
     }

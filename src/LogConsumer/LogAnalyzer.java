@@ -1,5 +1,6 @@
 package LogConsumer;
 
+import IntelMessage.IntelMessageRule;
 import Main.BuilderConf;
 import STGraph.STNode;
 import utils.RootPathReader;
@@ -16,17 +17,17 @@ import java.util.Stack;
 public class LogAnalyzer {
     STNode root;
     Map<String, STNode> flattenGraph;
-    Set<String> commonGroup;
+    //Set<String> commonGroup;
     BuilderConf conf = BuilderConf.getInstance();
 
     Map<String, SessionConsumer> consumerMap;
+    //Set<IntelMessageRule> allCriticalRules;
 
     String sessionRootPath;
     RootPathReader rootPathReader;
 
-    public LogAnalyzer(STNode rootNode, Set<String> commonGroup) {
+    public LogAnalyzer(STNode rootNode) {
         this.root = rootNode;
-        this.commonGroup = commonGroup;
         sessionRootPath = conf.getStringOrDefault("analyzer.session-root.path", "/path/to/session/root");
         rootPathReader = new RootPathReader(sessionRootPath);
         flattenRoot();
@@ -60,7 +61,7 @@ public class LogAnalyzer {
                 continue;
             }
             // we use the absolute path of the file as the session id
-            SessionConsumer consumer = new SessionConsumer(file, flattenGraph, commonGroup, file.getAbsolutePath());
+            SessionConsumer consumer = new SessionConsumer(file, flattenGraph, file.getAbsolutePath());
             consumer.consumeSession();
             consumerMap.put(file.getAbsolutePath(), consumer);
         }

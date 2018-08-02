@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import utils.RootPathReader;
 
+import javax.sound.sampled.Line;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -42,7 +43,12 @@ public class GraphBuilder {
     Map<String, Integer> groupNameToIndexMap;
 
     // common group from the helper
-    Set<String> commonGroup = null;
+    //Set<String> commonGroup = null;
+
+    // critical rules that appear in every session
+    //Set<IntelMessageRule> allCriticalRules;
+    Map<IntelMessageRule, Integer> ruleCount;
+    int count = 0;
 
 
     public GraphBuilder() {
@@ -62,60 +68,7 @@ public class GraphBuilder {
         }
 
         buildingNodesStack = new Stack<>();
-    }
-
-    public Set<String> getCommonGroup() {
-        if (commonGroup == null) {
-            logger.warn("Common Group has not been built yet.");
-        }
-        return commonGroup;
-    }
-
-    public HelperComposite buildMatrix() {
-        File logFile;
-        helper = new HelperComposite("root", intelMessageRuleList);
-        while ((logFile = rootPathReader.nextFile()) != null) {
-
-            if (logFile.getName().startsWith(".")) {
-                continue;
-            }
-            try {
-                formatter = (AbstractFormatter) formatterConstructor.newInstance(logFile, intelMessageRuleList);
-                //formatter.setLogFile(logFile);
-                //formatter.setRuleList(intelMessageRuleList);
-
-
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            }
-
-            helper.resetTimestamp();
-            IntelMessage message;
-            while((message = formatter.syncGetIntelMessage()) != null) {
-                helper.addIntelMessage(message);
-            }
-            logger.debug("added log file: " + logFile.getAbsolutePath());
-            helper.updateRelationship();
-//            // this field is for mr log
-//            String curAppName;
-//            curAppName = LogUtil.extractAppFromPath(logFile.getAbsolutePath());
-//            if (prevAppName == null || !prevAppName.equals(curAppName)) {
-//                helper.resetTimestamp();
-//                prevAppName = curAppName;
-//                helper.reset();
-//            }
-        }
-
-        this.groupRelationship = helper.groupRelationship;
-        this.indexToGroupNameMap = helper.indexToGroupNameMap;
-        this.groupNameToIndexMap = helper.groupNameToIndexMap;
-        this.commonGroup = helper.getCommonGroup();
-
-        return helper;
+        ruleCount = new HashMap<>();
     }
 
     public STNode buildGraph() {
@@ -141,6 +94,74 @@ public class GraphBuilder {
         }
         return root;
     }
+
+    /**
+     * this is the method that reads all log files.
+     * @return the <code>HelpComposite</code> that contains the relationship between groups and rules.
+     */
+    public HelperComposite buildMatrix() {
+        File logFile;
+        helper = new HelperComposite("root", intelMessageRuleList);
+        Set<IntelMessageRule> rulesInSession = new HashSet<>();
+        while ((logFile = rootPathReader.nextFile()) != null) {
+            rulesInSession.clear();
+            if (logFile.getName().startsWith(".") || logFile.length() == 0) {
+                continue;
+            }
+            try {
+                formatter = (AbstractFormatter) formatterConstructor.newInstance(logFile, intelMessageRuleList);
+                count++;
+                //formatter.setLogFile(logFile);
+                //formatter.setRuleList(intelMessageRuleList);
+
+
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+
+            helper.resetTimestamp();
+            IntelMessage message;
+            while((message = formatter.syncGetIntelMessage()) != null) {
+                helper.addIntelMessage(message);
+
+                // each rule in a session is counted only once in that session
+                if (!rulesInSession.contains(message.ruleRef)) {
+                    ruleCount.compute(message.ruleRef, (k, v) -> (v == null) ? 1 : v + 1);
+                    rulesInSession.add(message.ruleRef);
+                }
+            }
+            logger.debug("added log file: " + logFile.getAbsolutePath());
+            helper.updateRelationship();
+//            // this field is for mr log
+//            String curAppName;
+//            curAppName = LogUtil.extractAppFromPath(logFile.getAbsolutePath());
+//            if (prevAppName == null || !prevAppName.equals(curAppName)) {
+//                helper.resetTimestamp();
+//                prevAppName = curAppName;
+//                helper.reset();
+//            }
+        }
+
+        this.groupRelationship = helper.groupRelationship;
+        this.indexToGroupNameMap = helper.indexToGroupNameMap;
+        this.groupNameToIndexMap = helper.groupNameToIndexMap;
+        InfoPackage.getInstance().commonGroup = helper.getCommonGroup();
+        InfoPackage.getInstance().ruleRelationship = helper.ruleRelationship;
+        InfoPackage.getInstance().ruleToIndexMap = helper.ruleToIndexMap;
+
+        findCriticalRules();
+        //TEST
+        // to see which rules are not critical
+//        Set<IntelMessageRule> allRules = ruleCount.keySet();
+//        allRules.removeAll(allCriticalRules);
+        return helper;
+    }
+
+
 
     void buildSTNode(STNode node) {
         Set<String> childGroupCandidates = new HashSet<>();
@@ -212,6 +233,16 @@ public class GraphBuilder {
         if (commonGroup.contains(node.group)) {
             for (IntelMessageRule rule : helper.groupToRules.get(node.group)) {
                 node.updateSignatureSet(rule);
+            }
+        }
+    }
+
+    private void findCriticalRules() {
+        for (Map.Entry<IntelMessageRule, Integer> entry: ruleCount.entrySet()) {
+            IntelMessageRule key = entry.getKey();
+            Integer value = entry.getValue();
+            if (value >= count * 0.9) {
+                InfoPackage.getInstance().criticalRules.add(key);
             }
         }
     }

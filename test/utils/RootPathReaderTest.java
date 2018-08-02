@@ -5,6 +5,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -30,14 +32,14 @@ public class RootPathReaderTest {
 
     @Test
     public void justATest() throws Exception {
-        String[] strArray = new String[3];
-        strArray[0] = "token";
-        strArray[1] = "apple";
-        strArray[2] = "arandom string";
-        Arrays.sort(strArray);
-        for (String str: strArray) {
-            System.out.println(str);
-        }
+        Map<String, Integer> testMap = new HashMap<>();
+        testMap.compute("test1", (k, v) -> (v == null) ? 1 : v + 1);
+        testMap.compute("test1", (k, v) -> (v == null) ? 1 : v + 1);
+        testMap.compute("test1", (k, v) -> (v == null) ? 1 : v + 1);
+        testMap.compute("test2", (k, v) -> (v == null) ? 1 : v + 1);
+
+        System.out.print(testMap.toString());
+
     }
 
 }

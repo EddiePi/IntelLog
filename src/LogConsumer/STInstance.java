@@ -25,7 +25,7 @@ public class STInstance {
         this.signatureSet = signatureSet;
         signatureInstanceMap = new HashMap<>();
         for (SignatureRelationship relationship: signatureSet) {
-            signatureInstanceMap.put(relationship, new SigInstanceManager(relationship));
+            signatureInstanceMap.put(relationship, new SigInstanceManager(relationship, group));
         }
     }
 
@@ -33,7 +33,7 @@ public class STInstance {
         for (Map.Entry<SignatureRelationship, SigInstanceManager> entry: signatureInstanceMap.entrySet()) {
             SignatureRelationship key = entry.getKey();
             SigInstanceManager value = entry.getValue();
-            for (IntelMessageRule rule: key.includedRules) {
+            for (IntelMessageRule rule: key.getIncludedRules()) {
                 if (rule.equals(message.ruleRef)) {
                     value.addMessage(message);
                 }
@@ -41,11 +41,12 @@ public class STInstance {
         }
     }
 
-    @Override
-    public String toString() {
+    public void report() {
         StringBuilder builder = new StringBuilder("");
-        builder.append("group: ").append(group);
+        System.out.printf("group: %s\n", group);
+        for (SigInstanceManager manager: signatureInstanceMap.values()) {
+            manager.report();
+        }
 
-        return builder.toString();
     }
 }

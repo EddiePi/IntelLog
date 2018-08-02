@@ -26,7 +26,11 @@ public class SparkFormatter extends AbstractFormatter {
     }
 
     public SparkFormatter(File logFile, IntelMessageRuleList intelMessageRuleList) {
-        super(logFile, intelMessageRuleList);
+        this(logFile, intelMessageRuleList, FormatterMode.BUILDING);
+    }
+
+    public SparkFormatter(File logFile, IntelMessageRuleList intelMessageRuleList, FormatterMode mode) {
+        super(logFile, intelMessageRuleList, mode);
         punctReplaceMap = ForceReplaceMap.getInstance().punctReplaceMap;
     }
 

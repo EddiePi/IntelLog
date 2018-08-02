@@ -1,6 +1,7 @@
 package LogConsumer;
 
 import STGraph.GraphBuilder;
+import STGraph.InfoPackage;
 import STGraph.STNode;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,7 +19,7 @@ public class LogAnalyzerTest {
     public void setUp() throws Exception {
         builder = new GraphBuilder();
         STNode root = builder.buildGraph();
-        analyzer = new LogAnalyzer(root, builder.getCommonGroup());
+        analyzer = new LogAnalyzer(root);
     }
 
     @Test

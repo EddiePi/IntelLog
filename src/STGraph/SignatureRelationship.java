@@ -17,11 +17,15 @@ public class SignatureRelationship implements Serializable {
     static Logger logger = LogManager.getLogger();
     public Set<String> idSignature;
 
-    public Set<IntelMessageRule> includedRules;
+    private Set<IntelMessageRule> includedRules;
+
+    // critical rules are rules which are in every session
+    private Set<IntelMessageRule> criticalRules;
 
     public SignatureRelationship() {
         idSignature = new HashSet<>();
         includedRules = new HashSet<>();
+        criticalRules = new HashSet<>();
     }
 
     public static Set<String> getSignatureSet (IntelMessage message) {
@@ -43,5 +47,20 @@ public class SignatureRelationship implements Serializable {
             return null;
         }
         return getSignatureSet(rule.exampleMessage);
+    }
+
+    public void addIncludedRule(IntelMessageRule rule) {
+        includedRules.add(rule);
+        if (InfoPackage.getInstance().criticalRules.contains(rule)) {
+            criticalRules.add(rule);
+        }
+    }
+
+    public Set<IntelMessageRule> getIncludedRules() {
+        return includedRules;
+    }
+
+    public Set<IntelMessageRule> getCriticalRules() {
+        return criticalRules;
     }
 }
