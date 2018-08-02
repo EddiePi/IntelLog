@@ -49,5 +49,10 @@ public class IntelMessageRule implements Serializable {
         return res;
     }
 
-
+    public boolean equals(IntelMessageRule otherRule) {
+        if (this.originalLogKey.equals(otherRule.originalLogKey)) {
+            return true;
+        }
+        return false;
+    }
 }

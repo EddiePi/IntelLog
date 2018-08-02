@@ -15,9 +15,9 @@ import java.util.*;
 public class SignatureRelationship implements Serializable {
 
     static Logger logger = LogManager.getLogger();
-    Set<String> idSignature;
+    public Set<String> idSignature;
 
-    Set<IntelMessageRule> includedRules;
+    public Set<IntelMessageRule> includedRules;
 
     public SignatureRelationship() {
         idSignature = new HashSet<>();

@@ -42,6 +42,8 @@ public class HelperComposite extends STComponent {
 
     Map<String, Set<IntelMessageRule>> groupToRules;
 
+    private Set<String> commonGroup;
+
     public HelperComposite(String groupName, IntelMessageRuleList ruleList) {
 
         this.groupToRules = ruleList.buildGroupToRuleMap();
@@ -241,25 +243,27 @@ public class HelperComposite extends STComponent {
         }
     }
 
-    public Set<String> getCommonRelationship() {
-        int groupSize = indexToGroupNameMap.size();
-        String groupName;
-        Set<String> groupToReport = new HashSet<>();
-        for (int i = 0; i < groupSize; i++) {
-            groupName = indexToGroupNameMap.get(i);
+    public Set<String> getCommonGroup() {
 
-            Set<IntelMessageRule> groupedRuleSet = groupToRules.get(groupName);
-            if (groupedRuleSet != null && groupedRuleSet.size() > 1) {
-                groupToReport.add(groupName);
+        if (commonGroup == null) {
+            int groupSize = indexToGroupNameMap.size();
+            String groupName;
+            commonGroup = new HashSet<>();
+            for (int i = 0; i < groupSize; i++) {
+                groupName = indexToGroupNameMap.get(i);
+
+                Set<IntelMessageRule> groupedRuleSet = groupToRules.get(groupName);
+                if (groupedRuleSet != null && groupedRuleSet.size() > 1) {
+                    commonGroup.add(groupName);
+                }
             }
         }
-
-        return groupToReport;
+        return commonGroup;
     }
 
     public void reportCommonRelationship() {
         System.out.print("******** Reporting common relationship ***********\n");
-        Set<String> groupToReport = getCommonRelationship();
+        Set<String> groupToReport = getCommonGroup();
         int groupSize = indexToGroupNameMap.size();
         String groupName;
         System.out.println();
@@ -289,7 +293,7 @@ public class HelperComposite extends STComponent {
 
     public void reportCommonRuleRelationship() {
         System.out.print("******** Reporting common rule ***********\n");
-        Set<String> commonRelationship = getCommonRelationship();
+        Set<String> commonRelationship = getCommonGroup();
         Set<String> rulesToReport = new HashSet<>();
         for (Map.Entry<String, Set<IntelMessageRule>> entry: groupToRules.entrySet()) {
             if (commonRelationship.contains(entry.getKey())) {

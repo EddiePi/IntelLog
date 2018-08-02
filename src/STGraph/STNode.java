@@ -13,9 +13,9 @@ import java.util.Set;
  * Created by Eddie on 2018/7/23.
  */
 public class STNode implements Serializable{
-    String group;
+    public String group;
 
-    Set<SignatureRelationship> signatureSet;
+    public Set<SignatureRelationship> signatureSet;
 
     public transient Set<String> remainingGroups;
 

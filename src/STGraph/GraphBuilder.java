@@ -5,12 +5,9 @@ import IntelMessage.LogFormatter.AbstractFormatter;
 import Main.BuilderConf;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import utils.GsonSerializer;
-import utils.LogUtil;
 import utils.RootPathReader;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -25,10 +22,9 @@ public class GraphBuilder {
     Logger logger = LogManager.getLogger();
     BuilderConf conf = BuilderConf.getInstance();
     String logRootPath;
-    String intelRulePath;
     String logFormatterClassName;
     boolean useCommonGroup;
-    Class<? extends AbstractFormatter> formatterClazz;
+
     Constructor<?> formatterConstructor;
     AbstractFormatter formatter;
     RootPathReader rootPathReader;
@@ -45,8 +41,12 @@ public class GraphBuilder {
     Map<Integer, String> indexToGroupNameMap;
     Map<String, Integer> groupNameToIndexMap;
 
+    // common group from the helper
+    Set<String> commonGroup = null;
+
 
     public GraphBuilder() {
+        Class<? extends AbstractFormatter> formatterClazz;
         logRootPath = conf.getStringOrDefault("log-root.file.path", "../conf/log-root/");
         logFormatterClassName = conf.getStringOrDefault("log-formatter.class.name", "IntelMessage.LogFormatter.SparkFormatter");
         useCommonGroup = conf.getBooleanOrDefault("st-graph.common-group", true);
@@ -64,6 +64,13 @@ public class GraphBuilder {
         buildingNodesStack = new Stack<>();
     }
 
+    public Set<String> getCommonGroup() {
+        if (commonGroup == null) {
+            logger.warn("Common Group has not been built yet.");
+        }
+        return commonGroup;
+    }
+
     public HelperComposite buildMatrix() {
         File logFile;
         helper = new HelperComposite("root", intelMessageRuleList);
@@ -74,13 +81,11 @@ public class GraphBuilder {
             }
             try {
                 formatter = (AbstractFormatter) formatterConstructor.newInstance(logFile, intelMessageRuleList);
-                formatter.setLogFile(logFile);
-                formatter.setRuleList(intelMessageRuleList);
+                //formatter.setLogFile(logFile);
+                //formatter.setRuleList(intelMessageRuleList);
 
 
             } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
@@ -108,6 +113,7 @@ public class GraphBuilder {
         this.groupRelationship = helper.groupRelationship;
         this.indexToGroupNameMap = helper.indexToGroupNameMap;
         this.groupNameToIndexMap = helper.groupNameToIndexMap;
+        this.commonGroup = helper.getCommonGroup();
 
         return helper;
     }
@@ -117,7 +123,7 @@ public class GraphBuilder {
         if (helper == null) {
             buildMatrix();
         }
-        root.remainingGroups.addAll(useCommonGroup ? helper.getCommonRelationship() : helper.groupToRules.keySet());
+        root.remainingGroups.addAll(useCommonGroup ? helper.getCommonGroup() : helper.groupToRules.keySet());
 
         buildingNodesStack.push(root);
         while (!buildingNodesStack.empty()) {
@@ -202,7 +208,7 @@ public class GraphBuilder {
 
         // assign corresponding IntelMessageRule to the note
         // and find the signature group
-        Set<String> commonGroup = helper.getCommonRelationship();
+        Set<String> commonGroup = helper.getCommonGroup();
         if (commonGroup.contains(node.group)) {
             for (IntelMessageRule rule : helper.groupToRules.get(node.group)) {
                 node.updateSignatureSet(rule);
