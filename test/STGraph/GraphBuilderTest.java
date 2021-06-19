@@ -32,8 +32,8 @@ public class GraphBuilderTest {
         //String graphPath = "/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-map-graph.json";
         String graphPath = "/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-test/debug-level/spark-debug-graph.json";
         STNode root = builder.buildGraph();
-        System.out.println("STOP");
-        //GsonSerializer.writeJSON(root, graphPath);
+        //System.out.println("STOP");
+        GsonSerializer.writeJSON(root, graphPath);
     }
 
 }
