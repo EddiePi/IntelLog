@@ -26,7 +26,8 @@ public class EntityClassifierTest {
     public void setUp() throws Exception {
         classifier = new EntityClassifier();
         //entityFilePath = "/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-entity-sorted.txt";
-        entityFilePath = "/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-entity-sorted.txt";
+        //entityFilePath = "/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-entity-sorted.txt";
+        entityFilePath = "/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-test/debug-level/spark-entity-all-sorted.txt";
 
     }
 
@@ -40,7 +41,8 @@ public class EntityClassifierTest {
     @Test
     public void assignGroup() throws Exception {
         String readingRuleListFile = "/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-intel-log.json";
-        String writingRuleListFile = "/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-intel-log-with-group.json";
+        //String writingRuleListFile = "/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-intel-log-with-group.json";
+        String writingRuleListFile = "/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-test/debug-level/spark-intel-log-debug-all-with-group.json";
         IntelMessageRuleList ruleList = RuleListSingleton.getInstance().getIntelMessageRuleList();
         classifier.buildEntityGroup(entityFilePath);
         Map<String, Set<String>> wordToGroupMap = classifier.wordToGroupMap;

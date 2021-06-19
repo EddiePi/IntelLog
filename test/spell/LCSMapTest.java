@@ -18,8 +18,8 @@ public class LCSMapTest {
         map = new LCSMap();
         LogPreprocessor preprocessor;
 
-        //File f = new File("/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-only-content.log");
-        File f = new File("/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-only-content.log");
+        File f = new File("/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-test/debug-level/spark-only-content-debug.log");
+        //File f = new File("/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-only-content.log");
         //File f = new File("/home/eddie/log-preprocessor/data/spark-only-content.log");
         preprocessor = new LogPreprocessor(f);
         String line;
@@ -31,8 +31,8 @@ public class LCSMapTest {
 
     @Test
     public void writeResult() throws Exception {
-        //String fileName="/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-log-keys.txt";
-        String fileName="/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-log-keys.txt";
+        String fileName="/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-test/debug-level/spark-log-keys.txt";
+        //String fileName="/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-log-keys.txt";
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(fileName));
             for (LCSObject lcsObject: map.getAllLCSObjects()) {

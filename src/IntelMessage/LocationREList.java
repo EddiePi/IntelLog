@@ -33,7 +33,8 @@ public class LocationREList {
         // foo/bar, /foo/bar, foo/bar/
         locationREs.add(Pattern.compile(".*?(?<loc>/\\w+(/\\w+)+/?).*?"));
         // 192.168.32.1
-        locationREs.add(Pattern.compile(".*?(?<loc>\\w+@\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}).*?"));
+        //locationREs.add(Pattern.compile(".*?(?<loc>\\w+@\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}).*?"));
+        locationREs.add(Pattern.compile(".*?(?<loc>/?\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}).*?"));
     }
 
 }

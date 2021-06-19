@@ -29,8 +29,8 @@ public class TaggerTest {
         lemmatizer = Lemmatizer.getInstance();
         map = new LCSMap();
 
-        //File f = new File("/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-log-keys.txt");
-        File f = new File("/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-log-keys.txt");
+        File f = new File("/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-test/debug-level/spark-log-keys-debug-diff.txt");
+        //File f = new File("/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-log-keys.txt");
         FileReader fr;
         BufferedReader br;
         keys = new ArrayList<>();
@@ -74,8 +74,8 @@ public class TaggerTest {
     }
 
     public void writeTaggedLine() throws Exception {
-        //FileWriter fw = new FileWriter(new File("/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-keys-tags.txt"));
-        FileWriter fw = new FileWriter(new File("/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-unmodified-keys-tags.txt"));
+        FileWriter fw = new FileWriter(new File("/Users/Eddie/gitRepo/log-preprocessor/data/spark-data/spark-test/debug-level/spark-keys-tags-debug-diff.txt"));
+        //FileWriter fw = new FileWriter(new File("/Users/Eddie/gitRepo/log-preprocessor/data/mr-data/mr-unmodified-keys-tags.txt"));
         for (int i = 0; i < keys.size(); i++) {
             String keyTag = "";
             String[] key = keys.get(i);

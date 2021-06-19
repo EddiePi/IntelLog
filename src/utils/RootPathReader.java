@@ -26,11 +26,18 @@ public class RootPathReader {
         if (fileStack.empty() && (curFilesIterator == null || !curFilesIterator.hasNext())) {
             return null;
         } else {
-            while ((curFilesIterator == null || !curFilesIterator.hasNext()) && !fileStack.empty()) {
+            boolean hasNext = false;
+            if (curFilesIterator != null) {
+                hasNext = curFilesIterator.hasNext();
+            }
+            while ((curFilesIterator == null || !hasNext) && !fileStack.empty()) {
                 File curDir = fileStack.pop();
                 File[] allFilesAndDirInDir = curDir.listFiles();
                 List<File> filesList = new ArrayList<>();
                 for (File file: allFilesAndDirInDir) {
+                    if (file.getName().startsWith(".")) {
+                        continue;
+                    }
                     if (file.isDirectory()) {
                         fileStack.push(file);
                     } else {
@@ -38,7 +45,11 @@ public class RootPathReader {
                     }
                 }
                 curFilesIterator = filesList.iterator();
-                break;
+                if (curFilesIterator.hasNext()) {
+                    return curFilesIterator.next();
+                } else {
+                    continue;
+                }
             }
             if (curFilesIterator.hasNext()) {
                 return curFilesIterator.next();

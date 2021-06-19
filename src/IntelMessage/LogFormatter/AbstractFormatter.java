@@ -166,6 +166,7 @@ public abstract class AbstractFormatter {
      * @return
      */
     public IntelMessage buildCompleteMessage(IntelMessage message) {
+        System.out.printf("building: %s\n", message.originalLog);
 
         IntelMessageRule rule = getIntelMessageRule(message.getOriginalLog());
         if (rule == null) {
@@ -179,6 +180,10 @@ public abstract class AbstractFormatter {
             return null;
         }
         message.ruleRef = rule;
+        // TEST
+        //System.out.println("Log key: " + rule.originalLogKey);
+        //System.out.println("Message: " + message.originalLog);
+
         // build the identifiers, value and location in one pass
         String[] contentSeq  = message.getOriginalLog().split("\\s+");
         String[] POLSeq = new String[rule.POLSequence.size()];
